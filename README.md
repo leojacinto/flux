@@ -25,12 +25,12 @@ The backend and the UI are separate apps on purpose. The Fluent app stays in Stu
 
 ## Skills
 
-| Skill | Source | Does |
-| ----- | ------ | ---- |
-| `lux-app-method` | `skills/lux-app-method/SKILL.md` | The method: two apps, scope handling, Fluent steps, Lux file list and config templates, porting rules, handoff summary |
-| `lux-aiux-build` | built by `load-skills.mjs` from `@servicenow/agent-pack-aiux` | Main Lux rules for Build Agent |
-| `lux-ref-app`, `lux-ref-foundation`, `lux-ref-design` | built by `load-skills.mjs` from the same pack | AIUX reference material and a project scaffold |
-| `lux-meccha-src-lib`, `lux-meccha-src-ui` | `load-skills.mjs --example` | Test case only: original Meccha Octopus source and porting rules |
+| Skill | Source | Does | Used in the Meccha Octopus test |
+| ----- | ------ | ---- | ------------------------------- |
+| `lux-aiux-build` | built by `load-skills.mjs` from `@servicenow/agent-pack-aiux` | Main Lux rules for Build Agent | Yes |
+| `lux-ref-app`, `lux-ref-foundation`, `lux-ref-design` | built by `load-skills.mjs` from the same pack | AIUX reference material and a project scaffold | Yes |
+| `lux-meccha-src-lib`, `lux-meccha-src-ui` | `load-skills.mjs --example` | Original Meccha Octopus source and porting rules | Yes |
+| `lux-app-method` | `skills/lux-app-method/SKILL.md` | The method: two apps, scope handling, Fluent steps, Lux file list and config templates, porting rules, handoff summary | No. Added afterwards, not tested yet |
 
 The pack skills are generated at load time, not copied into this repo. A skill body is limited to 65,000 characters and extra files on a skill are blocked on the instance tested, so the reference material is split across several skills.
 
@@ -85,7 +85,11 @@ Files: `examples/meccha-octopus/lux-app` (build this one), `examples/meccha-octo
 
 ## Status
 
-The method ran end to end once with the prompts in `examples/meccha-octopus/prompts`. `lux-app-method` packages those instructions into a skill and has not been run as a skill yet. Rerunning the Build Agent steps creates new apps with new numbered scopes.
+Tested: the six Lux and example skills were loaded into Build Agent, and Build Agent used them to build the Meccha Octopus test case end to end. The method itself (two apps, scope fallback, source only, config fix, handoff) was given to Build Agent in the prompts in `examples/meccha-octopus/prompts` and done by hand where noted above.
+
+Not tested: `lux-app-method`. It puts the method into a skill so the prompts can be short, but it has not been loaded or run yet. The `lux-aiux-build` skill on the instance also needs `load-skills.mjs run` rerun to pick up its updated header.
+
+Rerunning the Build Agent steps creates new apps with new numbered scopes.
 
 ## Limits
 
