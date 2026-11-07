@@ -1,0 +1,11 @@
+{
+  "name": "Meccha Octopus BA UI",
+  "basename": "meccha-octopus-ba",
+  "landing": "/home",
+  "development": {
+    "token": ""
+  },
+  "build": {
+    "exclude": ["**/*.test.js", "**/test/**"]
+  }
+}

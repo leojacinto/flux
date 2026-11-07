@@ -1,0 +1,34 @@
+# Local only: login session, scratch scripts, driver files, live screenshots
+.local/
+
+# Dependencies and build output
+node_modules/
+scripts/node_modules/
+lux-app/node_modules/
+lux-app/dist/
+lux-app/dist-metadata/
+lux-app/target/
+lux-app/.now/
+dist/
+dist-metadata/
+target/
+.now/
+
+# Secrets and sessions
+.env
+.env.*
+*.local
+state.json
+
+# Recorder temp
+docs/video/raw/
+
+# Noise
+*.log
+.DS_Store
+
+# Not published yet: recordings, screenshots, step logs and the walkthrough
+docs/video/
+docs/shots/
+docs/steps/
+docs/walkthrough.md

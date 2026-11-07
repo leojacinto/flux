@@ -1,0 +1,8 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  esbuild: true
+  libxmljs2: true
+  protobufjs: true
+  onnxruntime-node: false
+  sharp: false

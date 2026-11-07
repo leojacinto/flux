@@ -1,0 +1,27 @@
+/**
+ * Application Tailwind extensions.
+ *
+ * Merged into the app's Tailwind delta sheet at build time.
+ * Supported directives:
+ *
+ *   @source inline("...")     — additional class safelists
+ *   @layer utilities { ... }  — new and overriding utility classes
+ *
+ * Do NOT add @import "tailwindcss" here — the build entry already includes it.
+ * Do NOT add @theme { ... } here — it is stripped by the build process.
+ *
+ * Note:
+ * Theme-level token overrides are also possible via theme.token_overrides.
+ * Override precedence is theme < app: this app-level sheet is adopted above
+ * the base platform sheet, so any app-level override here wins over the same
+ * token set at the theme level. Set app-level token overrides deliberately;
+ * they cannot be overridden by the theme.
+ */
+
+/* The arena callout in pages/home/page.js animates with data-[open] variants
+   and the motion tokens, so keep those utilities safelisted. */
+@source inline("aiux-badge aiux-badge-soft aiux-badge-info aiux-badge-warning aiux-badge-xs aiux-badge-sm aiux-badge-ghost");
+@source inline("aiux-alert aiux-alert-error aiux-alert-soft");
+@source inline("aiux-btn aiux-btn-sm aiux-btn-xs aiux-btn-primary aiux-btn-outline aiux-btn-ghost");
+@source inline("aiux-card aiux-card-body aiux-card-title");
+@source inline("aiux-join aiux-join-item aiux-toggle aiux-toggle-sm aiux-link");

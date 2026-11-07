@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-metadata/
+target/
+.now/
+.env
+.env.*
+*.log
+.DS_Store

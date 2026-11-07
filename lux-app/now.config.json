@@ -1,0 +1,15 @@
+{
+  "scope": "x_snc_meccha_oct_2",
+  "scopeId": "de3efed33bd05f90a0db3141a3e45a48",
+  "name": "Meccha Octopus BA UI",
+  "metadataDir": "src/plugin-xmls",
+  "appOutputDir": "dist-metadata/app",
+  "packageSourceCodeOnInstance": true,
+  "staticContent": {
+    "assets": {
+      "./public/**": {
+        "publicPath": "[$config.aiux.basename]/public"
+      }
+    }
+  }
+}

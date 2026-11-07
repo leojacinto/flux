@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "lib": ["ES5"],
+        "noEmit": true,
+        "checkJs": true,
+        "allowJs": true,
+        "noEmitHelpers": true,
+        "esModuleInterop": false,
+        "module": "None",
+        "strict": true,
+        "skipLibCheck": true
+    },
+    "include": ["**/*.script.js", "./@types/servicenow/glide.server.d.ts"]
+}
