@@ -1,45 +1,40 @@
 # Flux
 
-Meccha Octopus rebuilt with ServiceNow Build Agent: Fluent objects built and installed in Studio, Lux (AIUX) UI written by Build Agent and compiled locally. The original app is [leojacinto/meccha-octopus](https://github.com/leojacinto/meccha-octopus). This version has no IBM integration (shots come from a table) and no 3D world model.
+A Build Agent skill and a method for building full ServiceNow apps with a Lux (AIUX) UI. Build Agent builds and installs the Fluent backend in Studio and writes the Lux source. Lux Lab (or `now-sdk`) compiles and installs the UI from a laptop.
 
-Build Agent knows nothing about Lux out of the box, so six custom skills teach it. Studio cannot install `@servicenow/aiux`, so the Lux build and install runs on a laptop.
+Build Agent knows nothing about Lux out of the box, and Studio cannot install `@servicenow/aiux`. The skill covers the first problem. The method works around the second.
 
-## Layout
+Meccha Octopus ([leojacinto/meccha-octopus](https://github.com/leojacinto/meccha-octopus)) is the test case, in `examples/meccha-octopus/`. It is not the product.
 
-* `lux-app/` — the Lux UI app. Build and install this one.
-  * `pages/home/page.js` plus `pages/home/components/` — arena, picker, scoreboard, proof panel.
-  * `lib/` — game logic, octopus art, sound.
-  * `now.config.json`, `aiux.json` — scope, scope id and app basename (`meccha-octopus-ba`).
-* `fluent-app-reference/` — Fluent source Build Agent wrote (table, role, ACLs, `/pool` REST API). Reference only. It was installed from Studio; do not install it again from here.
-* `prompts/` — the two Build Agent prompts used (`fluent-app.txt`, `lux-ui-app.txt`).
-* `scripts/` — Playwright helpers.
-  * `login.mjs` saves a login session to `.local/state.json` (git-ignored).
-  * `load-skills.mjs` publishes the six skills to `sn_build_agent_instruction`.
-  * `seed-shots.mjs`, `check-pool.mjs` — fill and check the shot table.
-  * `export.mjs` — copies Studio workspace files to disk.
-  * `drive.mjs`, `c.sh`, `rec.mjs` — drive a browser by commands and record a square 1080 x 1080 video.
-* `docs/` — walkthrough, screenshots and videos. Kept local for now, not in the repo.
+## The method
 
-## Requirements
+1. **Load the skills** into Build Agent (`scripts/load-skills.mjs`). They are records in `sn_build_agent_instruction`.
+2. **Fluent app.** Prompt Build Agent with `prompts/fluent-app.template.txt`. It plans, you approve, it builds and installs tables, role, ACLs and REST APIs from Studio, and verifies them.
+3. **Lux UI app.** Prompt Build Agent with `prompts/lux-ui-app.template.txt`. It creates a second app and writes the Lux source only. It does not build, because Studio cannot.
+4. **Export** the UI app's files from Studio (`scripts/export.mjs`).
+5. **Compile and install** the UI app in Lux Lab or a terminal, from inside the app folder:
+   ```
+   pnpm install
+   pnpm build
+   pnpm run deploy
+   ```
+   Open `https://<instance>/aiux/<basename>/home`.
+6. **Change it later** in the local folder, or ask Build Agent, then export, build and deploy again. Do not edit the UI app in Studio after the install.
 
-Node 24 or later, pnpm 10 or later, `@servicenow/sdk` 4.12.1 or later, an instance on Australia Patch 5 / Zurich Patch 12 or later with Build Agent and custom skills enabled, and admin on that instance.
+The backend and the UI are separate apps on purpose. The Fluent app stays in Studio and is never touched from the laptop. Only the UI app is installed locally, so the two cannot drift apart.
 
-## Build the Lux app
+## Skills
 
-```
-cd lux-app
-pnpm install
-pnpm build
-pnpm run deploy
-```
+| Skill | Source | Does |
+| ----- | ------ | ---- |
+| `lux-app-method` | `skills/lux-app-method/SKILL.md` | The method: two apps, scope handling, Fluent steps, Lux file list and config templates, porting rules, handoff summary |
+| `lux-aiux-build` | built by `load-skills.mjs` from `@servicenow/agent-pack-aiux` | Main Lux rules for Build Agent |
+| `lux-ref-app`, `lux-ref-foundation`, `lux-ref-design` | built by `load-skills.mjs` from the same pack | AIUX reference material and a project scaffold |
+| `lux-meccha-src-lib`, `lux-meccha-src-ui` | `load-skills.mjs --example` | Test case only: original Meccha Octopus source and porting rules |
 
-Run it from inside `lux-app/`. Use `pnpm run deploy`; plain `pnpm deploy` is a different pnpm command. Authenticate first with `npx now-sdk auth`.
+The pack skills are generated at load time, not copied into this repo. A skill body is limited to 65,000 characters and extra files on a skill are blocked on the instance tested, so the reference material is split across several skills.
 
-Open `https://<instance>/aiux/meccha-octopus-ba/home`.
-
-`lux-app/now.config.json` carries the scope (`x_snc_meccha_oct_2`) and scope id from the instance this was built on. For another instance, create a Lux UI app in Studio first and put its scope and scope id there. The page also calls the REST API of the Fluent app, so change `POOL_URL` in `pages/home/page.js` to your Fluent app's scope.
-
-## Reproduce the whole chain
+## Use it
 
 ```
 cd scripts && npm install && cd ..
@@ -47,28 +42,58 @@ export INSTANCE_URL=https://<instance>.service-now.com
 export INSTANCE_USER=<admin user> INSTANCE_PASSWORD=<password>
 node scripts/login.mjs
 
-# 1. skills (MECCHA_SRC = clone of leojacinto/meccha-octopus after pnpm install)
-MECCHA_SRC=/path/to/meccha-octopus node scripts/load-skills.mjs run
-
-# 2. in Studio, give Build Agent prompts/fluent-app.txt, approve the plan
-# 3. seed shots into <fluent scope>_shot_set from an IBM Sampler V2 result file
-node scripts/seed-shots.mjs <fluent scope> <result.json>
-node scripts/check-pool.mjs <fluent scope>
-
-# 4. in Studio, give Build Agent prompts/lux-ui-app.txt, approve the plan
-# 5. copy the workspace files out, then build locally as above
-node scripts/export.mjs <workspaceId>:<ui scope>:lux-app
+# REFERENCE_APP = a Lux project with pnpm install done, so
+# node_modules/@servicenow/agent-pack-aiux exists (a clone of meccha-octopus works)
+REFERENCE_APP=/path/to/lux-project node scripts/load-skills.mjs run
 ```
 
-The workspace id is the first path segment in the `ba-file:/<id>/<scope>/...` URIs; it is visible in the Build Agent workspace file URIs. Set `CHROME_PATH` if Playwright has no browser installed.
+Then, in Studio's Build Agent:
 
-The Build Agent steps are driven by hand from screenshots. Rerunning them creates new apps with new numbered scopes.
+1. Fill in `prompts/fluent-app.template.txt`, send it, read the plan, approve it.
+2. Fill in `prompts/lux-ui-app.template.txt`, send it, approve the plan.
+3. Export the UI app and build it:
+   ```
+   node scripts/export.mjs <workspaceId>:<ui scope>:my-app-ui
+   cd my-app-ui && pnpm install && pnpm build && pnpm run deploy
+   ```
 
-## Notes
+The workspace id is the first path segment in the `ba-file:/<id>/<scope>/...` file URIs of the Build Agent workspace. Set `CHROME_PATH` if Playwright has no browser installed. Authenticate the SDK first with `npx now-sdk auth`.
 
-* The create-app tool cannot set a scope. It generates `x_snc_<name>_0`, then `_1`, and so on. Prompts ask for a scope and fall back to the generated one.
-* Skills are limited to 65,000 characters and cannot carry extra files here, so the reference material is split across six skills.
-* Build Agent does not always port code verbatim. It rewrote `octo-scoreboard.js` and the chart lines stopped drawing; the original file was restored. Diff ported files against the source.
-* After the local install, do not edit the UI app in Studio. Change `lux-app/`, rebuild, redeploy.
+## Test case: Meccha Octopus
+
+Rebuilt without the IBM integration (shots come from a table) and without the 3D world model.
+
+* Build Agent built and installed the Fluent app by itself: a shot table, a role, 4 ACLs and `GET /pool`.
+* Build Agent wrote the full Lux UI (19 files) in a second app.
+* Compiling and installing Lux was the only step done outside Studio.
+* The deployed app plays a 100 round match from real IBM shots (82% against 76% for a classical strategy).
+
+What needed a person:
+
+* Replacing the Studio scaffold's `now.config.json` and `package.json` with the AIUX shape. The skill now includes templates for this.
+* Restoring `octo-scoreboard.js`. Build Agent rewrote it instead of copying it and the chart lines did not draw.
+* Running the Lux compile and install.
+
+Files: `examples/meccha-octopus/lux-app` (build this one), `examples/meccha-octopus/fluent-app` (reference only, already installed from Studio), `examples/meccha-octopus/prompts`, and `scripts/seed-shots.mjs` and `scripts/check-pool.mjs` for the shot table.
+
+## Layout
+
+* `skills/lux-app-method/` — the skill.
+* `prompts/` — prompt templates.
+* `scripts/` — Playwright helpers: `login`, `load-skills`, `export`, `seed-shots`, `check-pool`, and `drive`, `c.sh`, `rec` (drive a browser by commands and record a square 1080 x 1080 video).
+* `examples/meccha-octopus/` — the test case.
+
+## Status
+
+The method ran end to end once with the prompts in `examples/meccha-octopus/prompts`. `lux-app-method` packages those instructions into a skill and has not been run as a skill yet. Rerunning the Build Agent steps creates new apps with new numbered scopes.
+
+## Limits
+
+* The create-app tool cannot set a scope. It generates `x_snc_<name>_0`, then `_1`, and so on. The prompts ask for a scope and fall back to the generated one.
+* Build Agent does not always port code verbatim. Diff ported files against the source.
 * Studio file content is not readable through the Table API. `scripts/export.mjs` uses `/api/sn_glider/sync/state` and `/api/sn_glider/sync/files`.
-* The IBM result file used for seeding is not included, because it carries an account id. Use your own, or the one from the original repo's `python/out/`.
+* Plain `pnpm deploy` is a different pnpm command. Use `pnpm run deploy`.
+
+## Requirements
+
+Node 24 or later, pnpm 10 or later, `@servicenow/sdk` 4.12.1 or later, an instance on Australia Patch 5 or Zurich Patch 12 or later with Build Agent and custom skills enabled, and admin on that instance.

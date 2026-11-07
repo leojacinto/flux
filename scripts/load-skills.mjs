@@ -1,13 +1,18 @@
-// Publishes six Build Agent skills (type=skill, applies_to=instance) from a local clone of the
-// original Meccha Octopus repo. Safe to rerun: records are matched by name and updated.
-//   MECCHA_SRC  path to a clone of leojacinto/meccha-octopus after `pnpm install`
-//   node scripts/load-skills.mjs [dry|run]     (dry prints sizes only)
+// Publishes Build Agent skills (type=skill, applies_to=instance). Safe to rerun: records are
+// matched by name and updated.
+//   lux-app-method                                        the method (skills/lux-app-method/SKILL.md)
+//   lux-aiux-build, lux-ref-app/-foundation/-design       Lux knowledge built from the AIUX agent pack
+//   lux-meccha-src-lib, lux-meccha-src-ui                 only with --example (the test case source)
+// Env: REFERENCE_APP = a Lux project with `pnpm install` done, so that
+//      node_modules/@servicenow/agent-pack-aiux exists (the original meccha-octopus clone works).
+// Usage: node scripts/load-skills.mjs [dry|run] [--example]    (dry prints sizes only)
 import fs from 'node:fs';
 import {authed} from './lib.mjs';
 
-const mode = process.argv[2] || 'dry';
-const ROOT = process.env.MECCHA_SRC;
-if (!ROOT) throw new Error('Set MECCHA_SRC to a clone of the original meccha-octopus repo (with node_modules)');
+const mode = process.argv[2] === 'run' ? 'run' : 'dry';
+const withExample = process.argv.includes('--example');
+const ROOT = process.env.REFERENCE_APP;
+if (!ROOT) throw new Error('Set REFERENCE_APP to a Lux project that has node_modules/@servicenow/agent-pack-aiux');
 const SKILL_DIR = `${ROOT}/node_modules/@servicenow/agent-pack-aiux/skills/aiux-build`;
 const NAME = 'lux-aiux-build';
 
@@ -53,7 +58,7 @@ const R = {
   'lux-ref-design': ['Lux reference: DaisyUI and Tailwind patterns, validation rules, audit and best-practice checklists, debugging guide. Invoke when styling or reviewing Lux UI.',
     ref(['references/design/daisyui-patterns.md', 'references/design/tailwind-reference.md', 'references/quality/validation-rules.md', 'references/quality/best-practices-checklist.md', 'references/quality/debugging-guide.md', 'references/quality/audit-checklist.md'])],
 };
-const header = `# lux-aiux-build (Lux = AIUX)\nLux is the product name for the AIUX framework (@servicenow/aiux, Lit, AIUXElement). Output for Lux requests must be a Lux app: aiux.json, application.js, theme.js, pages/<route>/page.js, plus Fluent (*.now.ts) for tables, ACLs and REST APIs. Never produce React UI Pages for Lux requests.\nBefore writing code, invoke these companion skills by name: lux-ref-app (project scaffold to copy, pages, navigation, theme), lux-ref-foundation (AIUXElement, Lit, SSR, loaders, data fetching, server scripts), lux-ref-design (DaisyUI, Tailwind, validation, audit). Paths such as references/... in the text below refer to files inside those companion skills.\n\n`;
+const header = `# lux-aiux-build (Lux = AIUX)\nLux is the product name for the AIUX framework (@servicenow/aiux, Lit, AIUXElement). Output for Lux requests must be a Lux app: aiux.json, application.js, theme.js, pages/<route>/page.js, plus Fluent (*.now.ts) for tables, ACLs and REST APIs. Never produce React UI Pages for Lux requests.\nBefore writing code, invoke lux-app-method (how to split a full app between Studio and a local Lux build), then these companion skills by name: lux-ref-app (project scaffold to copy, pages, navigation, theme), lux-ref-foundation (AIUXElement, Lit, SSR, loaders, data fetching, server scripts), lux-ref-design (DaisyUI, Tailwind, validation, audit). Paths such as references/... in the text below refer to files inside those companion skills.\n\n`;
 const skills = [[NAME, 'Build Lux (AIUX) apps, pages, widgets and components with @servicenow/aiux, Lit and AIUXElement. Use when the user asks for Lux or AIUX output (aiux.json, pages/, application.js). Output is Lux, never React UI Pages. Invoke lux-ref-app, lux-ref-foundation and lux-ref-design first.', header + skillMd],
   ...Object.entries(R).map(([n, [d, bdy]]) => [n, d, `# ${n}\n${bdy}`])];
 const rdSrc = f => fs.readFileSync(`${ROOT}/${f}`, 'utf8');
@@ -72,7 +77,9 @@ const srcSkills = [
   ['lux-meccha-src-ui', 'Reference source for the Meccha Octopus Lux app, part 2: pages/home/page.js and the arena, picker, proof and scoreboard components. Invoke when porting or building the Meccha Octopus Lux UI.',
     `# lux-meccha-src-ui\n${RULES}${srcFiles(['pages/home/page.js', 'pages/home/components/octo-arena.js', 'pages/home/components/octo-picker.js', 'pages/home/components/octo-proof.js', 'pages/home/components/octo-scoreboard.js'])}`],
 ];
-const all = [...skills, ...srcSkills];
+const methodMd = fs.readFileSync(new URL('../skills/lux-app-method/SKILL.md', import.meta.url), 'utf8');
+const methodSkill = ['lux-app-method', methodMd.match(/^description: (.*)$/m)[1], methodMd.replace(/^---[\s\S]*?---\n/, '')];
+const all = [methodSkill, ...skills, ...(withExample ? srcSkills : [])];
 for (const [n, , bdy] of all) console.log(n, bdy.length);
 if (all.some(([, , bdy]) => bdy.length > 65000)) throw new Error('body too long (65,000 character field limit)');
 if (mode === 'dry') process.exit(0);
