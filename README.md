@@ -37,9 +37,7 @@ All skills are in `skills/<name>/SKILL.md`: front matter (`name`, `description`)
 
 `lux-aiux-build` invokes the others by name. The reference skills are split because a skill body is limited to 65,000 characters and extra files on a skill are blocked on the instance tested.
 
-The skills build on `@servicenow/agent-pack-aiux` (see `skills/NOTICE.md`) plus additions from builds done here.
-
-Test case skills live in `examples/meccha-octopus/skills/` and are loaded only with `--example`: `example-meccha-octopus-lib` and `example-meccha-octopus-ui` (the original source and porting rules for the test app). They were called `lux-meccha-src-lib` and `lux-meccha-src-ui`; the loader renames those records on the instance instead of adding duplicates.
+The skills build on `@servicenow/agent-pack-aiux` (see `skills/NOTICE.md`) plus additions from builds done here. They contain no application specific content, so any app can be built with them.
 
 Keeping repo and instance in sync: edit skills in the instance if you like, then run `node scripts/pull-skills.mjs` to copy them back here (`--check` only reports differences).
 
@@ -80,18 +78,18 @@ What needed a person:
 * Restoring `octo-scoreboard.js`. Build Agent rewrote it instead of copying it and the chart lines did not draw.
 * Running the Lux compile and install.
 
-Files: `examples/meccha-octopus/lux-app` (build this one), `examples/meccha-octopus/fluent-app` (reference only, already installed from Studio), `examples/meccha-octopus/prompts`, `examples/meccha-octopus/skills`, and `scripts/seed-shots.mjs` and `scripts/check-pool.mjs` for the shot table.
+Files: `examples/meccha-octopus/lux-app` (build this one), `examples/meccha-octopus/fluent-app` (reference only, already installed from Studio), and `examples/meccha-octopus/scripts` (`seed-shots.mjs`, `check-pool.mjs`) for the shot table. The prompts were the templates in `prompts/` filled in, plus the original source supplied to Build Agent for porting.
 
 ## Layout
 
 * `skills/` — the skills and `NOTICE.md`.
 * `prompts/` — prompt templates.
-* `scripts/` — Playwright helpers: `login`, `load-skills`, `pull-skills`, `export`, `seed-shots`, `check-pool`, and `drive`, `c.sh`, `rec` (drive a browser by commands and record a square 1080 x 1080 video).
-* `examples/meccha-octopus/` — the test case: app, prompts, skills.
+* `scripts/` — Playwright helpers: `login`, `load-skills`, `pull-skills`, `export`, and `drive`, `c.sh`, `rec` (drive a browser by commands and record a square 1080 x 1080 video).
+* `examples/meccha-octopus/` — the test case: app, Fluent source and its two helper scripts.
 
 ## Status
 
-Tested: the Lux and test case skills were loaded into Build Agent, and Build Agent used them to build the Meccha Octopus test case end to end. The method itself (two apps, scope fallback, source only, config fix, handoff) was given to Build Agent in the prompts in `examples/meccha-octopus/prompts` and done by hand where noted above. `lux-aiux-build` and `lux-ref-foundation` were later extended from what went wrong in other builds.
+Tested: the Lux skills were loaded into Build Agent, and Build Agent used them to build the Meccha Octopus test case end to end. The method itself (two apps, scope fallback, source only, config fix, handoff) was given to Build Agent in the prompts and done by hand where noted above. `lux-aiux-build` and `lux-ref-foundation` were later extended from what went wrong in other builds.
 
 Not tested: `lux-app-method`. It puts the method into a skill so the prompts can be short, but it has not been loaded or run yet.
 

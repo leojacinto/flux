@@ -4,13 +4,6 @@ import {ROOT} from './lib.mjs';
 
 export const MAX_BODY = 65000;
 export const CORE_DIR = path.join(ROOT, 'skills');
-export const EXAMPLE_DIR = path.join(ROOT, 'examples/meccha-octopus/skills');
-
-// Records created under an older name. The loader renames them instead of adding a duplicate.
-export const RENAMED = {
-  'example-meccha-octopus-lib': 'lux-meccha-src-lib',
-  'example-meccha-octopus-ui': 'lux-meccha-src-ui',
-};
 
 export function readSkill(file) {
   const t = fs.readFileSync(file, 'utf8');

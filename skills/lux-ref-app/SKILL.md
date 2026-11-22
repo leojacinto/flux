@@ -1082,8 +1082,8 @@ After scaffolding the extension page/loader/layout, run through the normal pipel
 
 === FILE: aiux.json (reference app, adapt names and scope) ===
 {
-  "name": "Meccha Octopus",
-  "basename": "meccha-octopus",
+  "name": "My App",
+  "basename": "my-app",
   "landing": "/home",
   "development": {
     "token": ""
@@ -1107,7 +1107,7 @@ export default {
     const items = [
       {
         icon: 'home',
-        title: i18n.getMessage('Meccha Octopus'),
+        title: i18n.getMessage('My App'),
         action: {type: 'navigate', path: '/home'}
       },
       {
@@ -1126,7 +1126,7 @@ export default {
     const current = navLayoutContext.get();
     navLayoutContext.set({
       ...current,
-      appTitle: i18n.getMessage('Meccha Octopus'),
+      appTitle: i18n.getMessage('My App'),
       features: {
         menus: false,
         logo: true,
@@ -1172,9 +1172,9 @@ export const AppTheme = {
 
 === FILE: now.config.json (reference app, adapt names and scope) ===
 {
-  "scope": "x_snc_mec_oct",
-  "scopeId": "606b880b9ffa46abad6c2c81b5c4435b",
-  "name": "Meccha Octopus",
+  "scope": "x_snc_my_app",
+  "scopeId": "<scope id>",
+  "name": "My App",
   "metadataDir": "src/plugin-xmls",
   "appOutputDir": "dist-metadata/app",
   "packageSourceCodeOnInstance": true,
@@ -1189,10 +1189,10 @@ export const AppTheme = {
 
 === FILE: package.json (trimmed from the reference app) ===
 {
-  "name": "meccha-octopus",
+  "name": "my-app",
   "version": "1.0.0",
   "private": true,
-  "description": "AIUX application: Meccha Octopus",
+  "description": "AIUX application: My App",
   "scripts": {
     "build": "now-sdk build",
     "doctor": "aiux doctor",
@@ -1243,13 +1243,13 @@ import {customElement} from 'lit/decorators.js';
 import {AIUXElement, aiuxFetch} from '@servicenow/aiux/aiux-components-core';
 import {i18n} from '@servicenow/aiux/aiux-services';
 
-@customElement('x-snc-mec-oct-ba-home-page')
+@customElement('x-snc-my-app-home-page')
 export default class HomePage extends AIUXElement {
   static properties = {data: {state: true}};
   static styles = css`:host { display: block; }`;
   async firstUpdated() {
     if (isServer) return;
-    const resp = await aiuxFetch('/api/x_snc_mec_oct_ba/meccha_octopus_ba/pool');
+    const resp = await aiuxFetch('/api/x_snc_my_app/my_service/data');
     this.data = resp.ok ? (await resp.json()).result : null;
   }
   render() {

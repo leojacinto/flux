@@ -1,12 +1,12 @@
 // Turns an IBM Sampler V2 result file into shot sets and inserts them into <scope>_shot_set.
-// Usage: node scripts/seed-shots.mjs <scope> <result.json>
+// Usage: node examples/meccha-octopus/scripts/seed-shots.mjs <scope> <result.json>
 // Samples are hex ints over classical register c: bit 0 is Octo A's paint, bit 1 is Octo B's.
 // Each shot becomes the two character token "ab"; tokens are joined by spaces.
 import fs from 'node:fs';
-import {authed} from './lib.mjs';
+import {authed} from '../../../scripts/lib.mjs';
 
 const [scope, file] = process.argv.slice(2);
-if (!scope || !file) throw new Error('Usage: node scripts/seed-shots.mjs <scope> <result.json>');
+if (!scope || !file) throw new Error('Usage: node examples/meccha-octopus/scripts/seed-shots.mjs <scope> <result.json>');
 const T = `${scope}_shot_set`;
 const r = JSON.parse(fs.readFileSync(file, 'utf8'));
 const ORDER = [[0, 0], [0, 1], [1, 0], [1, 1]];
