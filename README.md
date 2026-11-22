@@ -25,7 +25,7 @@ The backend and the UI are separate apps on purpose. The Fluent app stays in Stu
 
 ## Skills
 
-All skills are in `skills/<name>/SKILL.md`: front matter (`name`, `description`) and the body Build Agent reads. They are published to the instance as records in `sn_build_agent_instruction` (`type` = skill, `applies_to` = instance, body limit 65,000 characters).
+All skills are in `skills/<name>/SKILL.md`: front matter (`name`, `description`) and the body Build Agent reads. They are published to the instance, owned by the app `x_snc_flux`, as records in `sn_build_agent_instruction` (`type` = skill, `applies_to` = instance, body limit 65,000 characters).
 
 | Skill | Does |
 | ----- | ---- |
@@ -50,6 +50,10 @@ export INSTANCE_USER=<admin user> INSTANCE_PASSWORD=<password>
 node scripts/login.mjs
 node scripts/load-skills.mjs run
 ```
+
+The skill records belong to an app with scope `x_snc_flux` (set `SKILLS_APP_SCOPE` to use another). Create that app once, in Studio or under System Applications. The loader switches your application picker to it and restores the picker afterwards.
+
+Or install the skills as an update set instead: `update-sets/flux-lux-skills-1.0.0.xml` holds the Flux app (`x_snc_flux`) and the five skills. In System Update Sets > Retrieved Update Sets, use Import Update Set from XML, then Preview and Commit.
 
 Then, in Studio's Build Agent:
 
@@ -84,6 +88,7 @@ Files: `examples/meccha-octopus/lux-app` (build this one), `examples/meccha-octo
 
 * `skills/` — the skills and `NOTICE.md`.
 * `prompts/` — prompt templates.
+* `update-sets/` — the skills and their app as an importable update set.
 * `scripts/` — Playwright helpers: `login`, `load-skills`, `pull-skills`, `export`, and `drive`, `c.sh`, `rec` (drive a browser by commands and record a square 1080 x 1080 video).
 * `examples/meccha-octopus/` — the test case: app, Fluent source and its two helper scripts.
 
